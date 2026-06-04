@@ -6,45 +6,39 @@
 ![Status](https://img.shields.io/badge/status-active-CCFF00?style=flat-square)
 ![Version](https://img.shields.io/badge/version-9.1-CCFF00?style=flat-square)
 
-AI-powered video editor. Drop in raw OBS footage, get back a tightly cut video with subtitles.
-
-Transcribes with Whisper, scores every speech segment, removes dead air, renders with GPU. 40+ hours of footage processed for 3 KL creators.
-
----
+AI-powered video editor for long-form OBS footage. Drop in raw video, get back a tighter cut with subtitles and GPU-accelerated rendering.
 
 ## How it works
 
-```
+```text
 raw .mp4
-   │
-   ▼
-[Phase 1] Transcription  — faster-whisper large-v3, word-level timestamps, Malay+English
-   │
-   ▼
-[Phase 2] Scoring        — transcript weight + audio energy + visual activity per segment
-   │
-   ▼
-[Phase 3] Topic grouping — gaps > 3.5s = new topic; topics > 90s split automatically
-   │
-   ▼
-[Phase 4] Selection      — top segments by quality mode (Highlights 62% / Balanced 38% / Chill 12%)
-   │
-   ▼
-[Phase 5] Rendering      — ffmpeg concat + NVENC GPU encode
-   │
-   ▼
-[Phase 6] Subtitles      — kinetic .ass + .srt (2-word UPPERCASE chunks, auto-burned)
-   │
-   ▼
+  |
+  v
+[Phase 1] Transcription  - faster-whisper large-v3, word-level timestamps, Malay + English
+  |
+  v
+[Phase 2] Scoring        - transcript weight + audio energy + visual activity
+  |
+  v
+[Phase 3] Topic grouping - gaps > 3.5s create new topics; long topics are split
+  |
+  v
+[Phase 4] Selection      - top segments by quality mode
+  |
+  v
+[Phase 5] Rendering      - ffmpeg concat + NVENC GPU encode
+  |
+  v
+[Phase 6] Subtitles      - kinetic .ass + .srt, auto-burned
+  |
+  v
 edited .mp4 + subtitles
 ```
 
 ## Genre presets
 
-Scoring weights differ by content type:
-
 | Genre | Transcript | Audio | Visual |
-|---|---|---|---|
+|---|---:|---:|---:|
 | Discord Call | 55% | 35% | 10% |
 | Gaming | 30% | 30% | 40% |
 | Vlog | 45% | 35% | 20% |
@@ -59,17 +53,17 @@ Scoring weights differ by content type:
 
 ## Stack
 
-- [`faster-whisper`](https://github.com/SYSTRAN/faster-whisper) — CTranslate2-based Whisper, runs large-v3 on GPU
-- `ffmpeg` — cutting, concatenation, NVENC encoding
-- `CUDA` — GPU transcription + rendering (falls back to CPU)
-- `tqdm` — progress tracking
+- [`faster-whisper`](https://github.com/SYSTRAN/faster-whisper)
+- `ffmpeg`
+- `CUDA` with CPU fallback
+- `tqdm`
 
 ## Requirements
 
-```
+```text
 Python 3.10+
-ffmpeg  (winget install ffmpeg)
-NVIDIA GPU with CUDA  (optional — CPU fallback available)
+ffmpeg
+NVIDIA GPU with CUDA (optional)
 ```
 
 ## Install
@@ -85,48 +79,41 @@ pip install faster-whisper tqdm
 ## Usage
 
 ```bash
-# Windows — double-click RUN.bat
-# or run directly:
+# Windows: double-click RUN.bat
+# or run directly
 python auto_cutter.py
 ```
 
 Prompts:
-1. Mode — Auto-cut or Manual trim
-2. Drop your `.mp4` path
-3. Genre — Gaming / Discord / Vlog / Auto
-4. Quality — Highlights / Balanced / Chill
-5. Wait. Review in `review.html`. Get final `.mp4`.
+
+1. Mode - Auto-cut or Manual trim
+2. Select the `.mp4` path
+3. Genre - Gaming / Discord / Vlog / Auto
+4. Quality - Highlights / Balanced / Chill
+5. Review in `review.html` and take the final `.mp4`
 
 ## Reaction word detection
 
-Whisper romanizes Malay, so `gila` stays `gila`. Detector covers:
+The detector keeps common English and Malay reactions so highlights surface naturally.
 
-```
-English: haha, bruh, bro, damn, yo, wait, clutch, gg, rip, omg ...
-Malay:   gila, babi, pergh, walao, sial, bodoh, mampus, harap, eh ...
-```
-
-Reaction density boosts segment score — squad banter, clutch moments, and highlights surface automatically.
-
-## Telegram done notification (v9.1)
-
-Add `notify.py` to the same folder and set env vars:
-
-```bash
-export TG_BOT_TOKEN="your_bot_token"
-export TG_CHAT_ID="your_chat_id"
+```text
+English: haha, bruh, bro, damn, yo, wait, clutch, gg, rip, omg
+Malay:   gila, babi, pergh, walao, sial, bodoh, mampus, harap, eh
 ```
 
-When a job finishes you get:
+## Telegram completion notification
 
-```
-vlog-automation done
-Output: output_20260528_143012.mp4
-1:23:45 → 0:52:10  (62% kept, 0:31:35 cut)
-Mode: DISCORD CALL / HIGHLIGHTS
+`notify.py` can send a Telegram message when a job finishes.
+
+1. Copy `.env.example` to `.env` or set the variables in your shell.
+2. Set:
+
+```text
+TG_BOT_TOKEN=your_bot_token
+TG_CHAT_ID=your_chat_id
 ```
 
-Every run is also appended to `processing_log.json` for usage stats.
+Every run is also appended to `processing_log.json` for local usage stats.
 
 ---
 

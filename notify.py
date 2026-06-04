@@ -1,22 +1,24 @@
 """
-notify.py — optional Telegram completion notification for vlog-automation.
+notify.py - optional Telegram completion notification for vlog-automation.
 
-Usage: import notify; notify.done(stats_dict) at end of processing.
-Set TG_BOT_TOKEN and TG_CHAT_ID env vars, or hardcode below.
-Leave blank to disable.
+Usage:
+    import notify
+    notify.done(stats_dict)
+
+Set TG_BOT_TOKEN and TG_CHAT_ID in your environment or local .env workflow.
+Leave them blank to disable notifications.
 """
 
-import os
 import json
-import requests
+import os
 from datetime import datetime
 
-# ── CONFIG ───────────────────────────────────────────────────────────────────
-BOT_TOKEN = os.getenv("TG_BOT_TOKEN", "")   # e.g. 123456:ABC...
-CHAT_ID   = os.getenv("TG_CHAT_ID",   "")   # your Telegram user/chat ID
+import requests
+
+BOT_TOKEN = os.getenv("TG_BOT_TOKEN", "").strip()
+CHAT_ID = os.getenv("TG_CHAT_ID", "").strip()
 STATS_LOG = "processing_log.json"
 
-# ─────────────────────────────────────────────────────────────────────────────
 
 def _send(text):
     if not BOT_TOKEN or not CHAT_ID:
@@ -25,7 +27,7 @@ def _send(text):
         requests.post(
             f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
             json={"chat_id": CHAT_ID, "text": text, "parse_mode": "HTML"},
-            timeout=8
+            timeout=8,
         )
     except Exception:
         pass
@@ -54,34 +56,34 @@ def _fmt(seconds):
 
 def done(stats: dict):
     """
-    Call at end of processing. stats keys:
-      input_file    str
-      total_dur     float  (seconds)
-      kept_dur      float  (seconds)
-      output_file   str
-      genre         str  (optional)
-      quality       str  (optional)
+    Call at the end of processing.
+
+    Expected stats keys:
+      input_file   str
+      total_dur    float (seconds)
+      kept_dur     float (seconds)
+      output_file  str
+      genre        str (optional)
+      quality      str (optional)
     """
     stats["timestamp"] = datetime.now().isoformat()
     _save_stats(stats)
 
     total = stats.get("total_dur", 0)
-    kept  = stats.get("kept_dur",  0)
-    pct   = round(kept / total * 100) if total else 0
-    cut   = total - kept
+    kept = stats.get("kept_dur", 0)
+    pct = round(kept / total * 100) if total else 0
+    cut = total - kept
     fname = os.path.basename(stats.get("output_file", "output.mp4"))
     genre = stats.get("genre", "")
-    qual  = stats.get("quality", "")
+    qual = stats.get("quality", "")
 
     msg = (
         f"<b>vlog-automation done</b>\n"
         f"Output: {fname}\n"
-        f"{_fmt(total)} → {_fmt(kept)}  ({pct}% kept, {_fmt(cut)} cut)\n"
+        f"{_fmt(total)} -> {_fmt(kept)} ({pct}% kept, {_fmt(cut)} cut)\n"
     )
     if genre or qual:
         msg += f"Mode: {genre} / {qual}\n"
 
     _send(msg)
-
-    # Also print to terminal
     print(f"\n  Notification sent ({fname})")

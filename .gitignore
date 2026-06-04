@@ -7,7 +7,9 @@
 *.json
 *.zip
 venv/
+.venv/
 .env
 editing
 __pycache__/
 *.pyc
+processing_log.json
