@@ -1,4 +1,4 @@
-# vlog-automation
+# video-editing-automation
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
 ![CUDA](https://img.shields.io/badge/CUDA-GPU_accelerated-76B900?style=flat-square&logo=nvidia&logoColor=white)
@@ -69,8 +69,8 @@ NVIDIA GPU with CUDA (optional)
 ## Install
 
 ```bash
-git clone https://github.com/arifaqyl/vlog-automation
-cd vlog-automation
+git clone https://github.com/arifaqyl/video-editing-automation
+cd video-editing-automation
 python -m venv venv
 venv\Scripts\activate
 pip install faster-whisper tqdm
