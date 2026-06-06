@@ -1,5 +1,5 @@
 """
-notify.py - optional Telegram completion notification for vlog-automation.
+notify.py - optional Telegram completion notification for video-editing-automation.
 
 Usage:
     import notify
@@ -78,7 +78,7 @@ def done(stats: dict):
     qual = stats.get("quality", "")
 
     msg = (
-        f"<b>vlog-automation done</b>\n"
+        f"<b>video-editing-automation done</b>\n"
         f"Output: {fname}\n"
         f"{_fmt(total)} -> {_fmt(kept)} ({pct}% kept, {_fmt(cut)} cut)\n"
     )
